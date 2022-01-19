@@ -3,43 +3,48 @@ import keyboard
 from sys import exit
 import pickle
 import os
+import pyfiglet
+from model import save_class
+from model import function
+from model.save_class import saved
+from art import tprint
 # import save_class
 # from save_class import saved
-from model import save_class
-from model.save_class import saved
 
 current_level = 0
-all_levels = [0, 27, 54, 81, 108, 135, 162, 189]  # from levels.txt
-saved_variables = save_class.saved(0, 0, 0)
+# The eight levels to be played from the file from levels.txt
+all_levels = [0, 27, 54, 81, 108, 135, 162, 189]
+saved_variables = save_class.saved(0, 0, 0)  # this to save the game
 
-level_y = [[] for a in range(24)]
+level_y = [[] for a in range(24)]  # this row of the game
 
-enemy_x = 65
+player_x = 6  # the start point in X line ( 0 player )
+player_y = 3
+last_x = 6  # the last point ( player )
+last_y = 3
+enemy_x = 65  # the start point ( enemy * )
 enemy_y = 20
 e_last_x = 56
 e_last_y = 20
-player_x = 6
-player_y = 3
-last_x = 6
-last_y = 3
-lives = 5
+lives = 5  # number fo lives
 score = 0
 loop = True
+
+
 # saved_variables =
 
 
-def print_level():
+def print_level():  # this print all level
     for row in level_y:
-        print(*row,sep='')
-
+        print(*row, sep='')
 
 
 def clear_level():
-    for row in level_y:
+    for row in level_y:  # this clear level_y ( row )
         row.clear()
 
 
-def new_level():
+def new_level():  # function git level from level.txt and set in level_y ( list [list])
     global player_x
     global player_y
     global enemy_x
@@ -49,20 +54,21 @@ def new_level():
     player_x = 6
     player_y = 3
     clear_level()
-    byte = all_levels[current_level]
-    range_value = byte
+    byte = all_levels[current_level]  # take the current_level to start with it
+    # all_levels = [0, 27, 54, 81, 108, 135, 162, 189]
+    range_value = byte  # start take from level.txt line
     range_value2 = byte + 24
-    row = 0
+    row = 0  # row from level.txt to level_y
     while byte in range(range_value, range_value2):
         read_file = open('levels.txt', 'r')
-        read_line = read_file.readlines()
+        read_line = read_file.readlines()  # read line by line
         final_answer = read_line[byte]
         byt = 0
         first = 0
         second = 1
-        while byt in range(0, 72):
+        while byt in range(0, 72):  # 72 num of char in thr row
             # line_y = level_y[row]
-            level_y[row].append(final_answer[first:second])
+            level_y[row].append(final_answer[first:second])  # read key by key
             first = first + 1
             second = second + 1
             byt = byt + 1
@@ -75,7 +81,7 @@ def new_level():
     level_y[1].append("")
 
 
-def save():
+def save():  # to save the game in save.txt
     global saved_variables
     global score
     global lives
@@ -84,16 +90,16 @@ def save():
     global enemy_x
     global enemy_y
     global current_level
-    saved_variables = saved(score, lives, current_level)
+    saved_variables = saved(score, lives, current_level)  # from class
 
-    with open('chase_save.txt', 'wb') as fp:
-        pickle.dump(saved_variables, fp)
-    print('saved to "chase_save.txt"')
+    with open('save.txt', 'wb') as fp:
+        pickle.dump(saved_variables, fp)  # to save as object
+    print('saved to "save.txt"')
     time.sleep(1)
     pause_menu(0)
 
 
-def open_save():
+def open_save():  # open the save game
     global saved_variables
     global score
     global lives
@@ -114,18 +120,16 @@ def open_save():
 
 def pause_menu(print_pause):
     if print_pause == 1:
-        print(" _ __   __ _ _   _ ___  ___ ")
-        print("| |   \ / _` | | | / __|/ _ \ ")
-        print("| |   |  (_| | |_| \__ \  __/")
-        print("| |  / \__,_|\__,_|___/\___|")
-        print("|_|  | |    ")
-        print("")
-    print('"c" to resume, "q" to quit, "s" to save, "o" to open an existing game')
+        result = pyfiglet.figlet_format("PAUSE", font="5lineoblique")
+        print(result)
+    print('Enter :\n"c" To Resume.\n"q" to quit,\n"s" to save,\n"o" to open an existing game')
+
     while loop:
         if keyboard.is_pressed('c'):
             return
         if keyboard.is_pressed('q'):
             # return
+            function.main_menu()
             exit()
         if keyboard.is_pressed('s'):
             save()
@@ -133,7 +137,7 @@ def pause_menu(print_pause):
             open_save()
 
 
-def take_inputs():
+def take_inputs():  # take from inputs.
     move_up = True
     move_down = True
     move_right = True
@@ -254,7 +258,7 @@ def take_inputs():
         enemy_x = enemy_x - 1
 
 
-def evaluate():
+def evaluate():  # Check game status
     global player_x
     global player_y
     global loop
@@ -281,7 +285,7 @@ def evaluate():
             exit()
     if player_x == 65 and player_y == 20:
         current_level = current_level + 1
-        if current_level == 9:
+        if current_level == 8:
             print("You Win !")
             time.sleep(1)
             play_again = input('press enter to replay')
@@ -296,7 +300,7 @@ def evaluate():
         new_level()
 
 
-def replace():
+def replace():  # switch values
     which_last_y = level_y[last_y]
     which_last_y[last_x] = '_'
     which_last_y = level_y[e_last_y]
@@ -310,13 +314,14 @@ def replace():
     level_y[0][73] = score
     level_y[1][73] = lives
 
-def cls():
+
+def cls():   # clear screen
     _ = os.system("cls")
 
 
 def strat_game():
     new_level()
-    #
+
     while True:
         cls()
         take_inputs()
@@ -324,4 +329,26 @@ def strat_game():
         print_level()
         replace()
         time.sleep(.1)
-# strat_game()
+
+
+def open_levle():
+    global current_level
+    while True:
+        try:
+            level = int(input("Enter the level you want to play :"))
+            if level > 0 and level < 8:
+                current_level = level
+                break
+            else:
+                print( "plcae chose level(1 - 7)")
+        except:
+            print("place Enter number ( 0 - 7)  not char ")
+    startGame = input("press Enter to Start game with level -> (" + str(current_level) + " )or any key to back menu")
+    if startGame == "":
+        strat_game()
+    else:
+        return
+
+
+
+
